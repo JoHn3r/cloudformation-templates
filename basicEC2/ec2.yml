@@ -1,0 +1,56 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: An EC2 instance
+Parameters:
+  Initials:
+    Type: String
+    Default: et
+  InstanceType:
+    Type: String
+    Default: t2.micro
+  IngressCidrSSH1:
+    Type: String
+    Default: 0.0.0.0/0
+Mappings:
+  AWSRegionToAMI: # CentOs
+    eu-west-1:
+      AMIID: ami-6e28b517
+Resources:
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub 'sbx-ec2-${Initials}'
+      GroupDescription: Security Group for tests
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref 'IngressCidrSSH1'
+      Tags:
+        - Key: Name
+          Value: !Sub 'sbx-ec2-${Initials}'
+  Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap ['AWSRegionToAMI', !Ref 'AWS::Region', AMIID]
+      InstanceType: !Ref 'InstanceType'
+      KeyName: !Sub 'sbx-${Initials}'
+      SecurityGroupIds:
+        - !Sub '${SecurityGroup.GroupId}'
+      Tags:
+        - Key: Name
+          Value: !Sub 'sbx-ec2-${Initials}-server'
+Outputs:
+  BastionPublicIp:
+    Value: !Sub '${Instance.PublicIp}'
+    Export:
+      Name: !Sub 'sbx-${Initials}-server-public-ip'
+  BastionPrivateIp:
+    Value: !Sub '${Instance.PrivateIp}'
+    Export:
+      Name: !Sub 'sbx-${Initials}-server-private-ip'
+  BastionAZ:
+    Value: !Sub '${Instance.AvailabilityZone}'
+    Export:
+      Name: !Sub 'sbx-${Initials}-server-az'
+
