@@ -1,0 +1,90 @@
+---
+AWSTemplateFormatVersion: 2010-09-09
+Description: An Elasticsearch domain
+Parameters:
+  Env:
+    Type: String
+  OpsTeamCidr:
+    Type: String
+    Default: 0.0.0.0/0
+  Region:
+    Type: String
+    Default: eu-west-1
+  DomainName:
+    Type: String
+  HostedZoneId:
+    Type: String
+  AccountId:
+    Type: Number
+  ESInstanceType:
+    Type: String
+    Default: t2.medium.elasticsearch
+  ESVersion:
+    Type: String
+    Default: 6.3
+Resources:
+  ESDomain:
+    Type: "AWS::Elasticsearch::Domain"
+    Properties:
+      ElasticsearchVersion: !Ref 'ESVersion'
+      ElasticsearchClusterConfig:
+        InstanceCount: 1
+        InstanceType: !Ref 'ESInstanceType'
+      AccessPolicies:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: "*"
+            Action: es:*
+            Resource: !Sub 'arn:aws:es:${Region}:${AccountId}:domain/*'
+      EBSOptions:
+        EBSEnabled: true
+        Iops: 0
+        VolumeSize: 10
+        VolumeType: standard
+      VPCOptions:
+        SubnetIds:
+          - Fn::ImportValue: !Sub '${Env}-${Region}a-public-subnet-id'
+        SecurityGroupIds:
+          - !Ref 'ESSecurityGroup'
+      Tags:
+        - Key: 'Name'
+          Value: !Sub '${Env}-es-domain'
+  ESSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub '${Env}-es-sg'
+      GroupDescription: Security Group for ES
+      VpcId:
+        Fn::ImportValue: !Sub '${Env}-vpc-id'
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: '0.0.0.0/0'
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: '0.0.0.0/0'
+          # CidrIp: !Ref 'OpsTeamCidr'
+      Tags:
+        - Key: Name
+          Value: !Sub '${Env}-es-sg'
+  DNSRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneName: !Sub '${DomainName}.'
+      Comment: DNS name for my ES
+      Name: !Sub '${Env}-es.${DomainName}.'
+      Type: CNAME
+      TTL: 900
+      ResourceRecords:
+        - !GetAtt 'ESDomain.DomainEndpoint'
+Outputs:
+  ESArn:
+    Value: !GetAtt 'ESDomain.DomainArn'
+    Description: Arn for the elasticsearch domain
+  ESEndpoint:
+    Value: !GetAtt 'ESDomain.DomainEndpoint'
+    Description: Endpoint for the elasticsearch domain
