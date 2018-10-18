@@ -1,3 +1,28 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: An EC2 instance
+Description: WorkShop2RDS Creation
+Resources:
+ rdsDBSubnetGroup:
+   Type: AWS::RDS::DBSubnetGroup
+   Properties:
+     DBSubnetGroupDescription: et-test
+     SubnetIds:
+       - <SUB_ID1>
+       - <SUB_ID2>
+       - <SUB_ID3>
+     Tags:
+       - Key: Owner
+         Value: VMA
+ RDSDBI534H6:
+   Type: 'AWS::RDS::DBInstance'
+   Properties:
+     AllocatedStorage: '100'
+     DBInstanceClass: db.r4.large
+     Engine: sqlserver-se
+     MasterUsername: ConnectTop
+     MasterUserPassword: ConnectTop
+     MultiAZ: true
+     DBSubnetGroupName: !Ref rdsDBSubnetGroup
+     LicenseModel: license-included
+     VPCSecurityGroups:
+       - <SG_ID>

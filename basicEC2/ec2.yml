@@ -14,7 +14,7 @@ Parameters:
 Mappings:
   AWSRegionToAMI: # CentOs
     eu-west-1:
-      AMIID: ami-6e28b517
+      AMIID: <AMI_id>
 Resources:
   SecurityGroup:
     Type: AWS::EC2::SecurityGroup
