@@ -1,6 +1,6 @@
 # cloudformation-templates
 
-export AWS_PROFILE=<aws-profile>
+export AWS_PROFILE=<aws-profile> | --profile
 
 aws cloudformation validate-template --template-body file://./<stack>.yml
 
