@@ -1,0 +1,38 @@
+[
+    {
+        "ParameterKey": "ParamVpc",
+        "ParameterValue": "vpc-00d2e6e3f3c45eaae"
+    },
+    {
+        "ParameterKey": "VPCPrivateSubnetAZ1",
+        "ParameterValue": "subnet-09c525f33fe09f774"
+    },
+    {
+        "ParameterKey": "VPCPrivateSubnetAZ2",
+        "ParameterValue": "subnet-0d664b7d462062af4"
+    },
+    {
+        "ParameterKey": "ParamMasterCount",
+        "ParameterValue": "3"
+    },
+    {
+        "ParameterKey": "ParamMasterType",
+        "ParameterValue": "t2.medium.elasticsearch"
+    },
+    {
+        "ParameterKey": "ParamDataCount",
+        "ParameterValue": "2"
+    },
+    {
+        "ParameterKey": "ParamDataType",
+        "ParameterValue": "t2.medium.elasticsearch"
+    },
+    {
+        "ParameterKey": "ParamEnvironment",
+        "ParameterValue": "DEATH"
+    },
+    {
+        "ParameterKey": "ParamHostedZone",
+        "ParameterValue": "ZYIPRIE3S27IU"
+    }
+]

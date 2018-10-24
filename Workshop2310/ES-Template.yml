@@ -1,0 +1,83 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: ElasticSearch Service
+Parameters:
+  ParamVpc:
+    Type: String
+  VPCPrivateSubnetAZ1:
+    Type: String
+  VPCPrivateSubnetAZ2:
+    Type: String
+  ParamMasterCount:
+    Type: Number
+  ParamMasterType:
+    Type: String
+  ParamDataCount:
+    Type: Number
+  ParamDataType:
+    Type: String
+  ParamEnvironment:
+    Type: String
+  ParamHostedZone:
+    Type: AWS::Route53::HostedZone::Id
+Resources:
+  ResourceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Elastic Search
+      VpcId:
+        Ref: ParamVpc
+      # SecuritygroupIngress:
+      #   - IpProtocol: tcp
+      #     FromPort: 80
+      #     ToPort: 80
+      #     CidrIp: 217.151.0.0/20
+      Tags:
+        - Key: Name
+          Value: !Sub 'ES-${ParamEnvironment}-Elasticsearch'
+  ResourceDomain:
+    Type: AWS::Elasticsearch::Domain
+    Properties:
+      ElasticsearchVersion: 6.3
+      ElasticsearchClusterConfig:
+        DedicatedMasterEnabled: true
+        DedicatedMasterCount: !Ref 'ParamMasterCount'
+        DedicatedMasterType: !Ref 'ParamMasterType'
+        InstanceCount: !Ref 'ParamDataCount'
+        InstanceType: !Ref 'ParamDataType'
+        ZoneAwarenessEnabled: true
+      EBSOptions:
+        EBSEnabled: true
+        Iops: 0
+        VolumeSize: 10
+        VolumeType: standard
+      AccessPolicies:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: '*'
+            Action: es:*
+            Resource: '*'
+          - Effect: Allow
+            Principal:
+              AWS: '*'
+            Action: iam:CreateServiceLinkedRole
+            Resource: arn:aws:iam::*:role/aws-service-role/*
+      VPCOptions:
+        SubnetIds:                              
+          - !Ref 'VPCPrivateSubnetAZ1'
+          - !Ref 'VPCPrivateSubnetAZ2'
+        SecurityGroupIds:
+          - !Ref 'ResourceSecurityGroup'
+      SnapshotOptions:
+          AutomatedSnapshotStartHour: 15
+  ResourceRecordSetGroup:
+    Type: AWS::Route53::RecordSetGroup
+    Properties:
+      HostedZoneId: !Ref 'ParamHostedZone'
+      RecordSets:
+        - Name: !Sub 'ES.${ParamEnvironment}.sl-sbx.com'
+          Type: CNAME
+          TTL: 900
+          ResourceRecords:
+            - !GetAtt ResourceDomain.DomainEndpoint
