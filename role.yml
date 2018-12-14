@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: Assume role to get secret on Central Shared
+Description: Assume role to get secret on Central Shared Services
 Resources:
   RoleSecretManager:
     Type: AWS::IAM::Role
@@ -12,18 +12,14 @@ Resources:
               Service:
                 - lambda.amazonaws.com
             Action:
-              - sts:AssumeRole
+            - sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AdministratorAccess
-  RolePolicies:
-      Type: "AWS::IAM::Policy"
-      Properties:
-        PolicyName: "Central_Shared_assume_role"
-        PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-          - Effect: Allow
-            Action: sts:AssumeRole
-            Resource: arn:aws:iam::936992537267:role/central-shared-services-digit-nonprod-assume-role
-        Roles:
-          - !Ref "RoleSecretManager"
+      Policies:
+        - PolicyName: "CentralSharedAssumeRole"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+            - Effect: Allow
+              Action: sts:AssumeRole
+              Resource: arn:aws:iam::936992537267:role/central-shared-services-assumedigitalnonprod-iam-role
